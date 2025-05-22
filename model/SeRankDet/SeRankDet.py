@@ -3,6 +3,7 @@
 # @Email   : 121106022690@njust.edu.cn
 # @File    : SeRankDet.py
 # @Software: PyCharm
+#改：三层+通道注意力
 from __future__ import print_function, division
 
 import einops
@@ -15,6 +16,25 @@ from torch import einsum
 
 from model.SeRankDet.tools import conv_relu_bn, CDC_conv
 
+class ChannelAttention(nn.Module):
+    def __init__(self, in_ch, reduction_ratio=16):
+        super(ChannelAttention, self).__init__()
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.max_pool = nn.AdaptiveMaxPool2d(1)
+
+        self.fc = nn.Sequential(
+            nn.Conv2d(in_ch, in_ch // reduction_ratio, kernel_size=1, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(in_ch // reduction_ratio, in_ch, kernel_size=1, bias=False)
+        )
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        avg_out = self.fc(self.avg_pool(x))
+        max_out = self.fc(self.max_pool(x))
+        attn = self.sigmoid(avg_out + max_out) # 组合并应用 sigmoid
+        return x * attn + x # 应用注意力并添加残差连接
+    
 
 class conv_block(nn.Module):
     """
@@ -117,8 +137,7 @@ class new_conv_block(nn.Module):
     """
     Convolution Block
     """
-
-    def __init__(self, in_ch, out_ch):
+    """def __init__(self, in_ch, out_ch):
         super(new_conv_block, self).__init__()
         self.conv_layer = nn.Sequential(
             conv_relu_bn(in_ch, in_ch, 1),
@@ -141,8 +160,43 @@ class new_conv_block(nn.Module):
         dconv_out = self.dconv_layer(x)#中空卷积
         out = torch.concat([conv_out, cdc_out, dconv_out], dim=1)#合并
         out = self.final_layer(out)#卷积
-        return out
+        return out"""
+    def __init__(self, in_ch, out_ch):
+        super(new_conv_block, self).__init__()
+        self.conv_layer = nn.Sequential(
+            conv_relu_bn(in_ch, in_ch, 1),
+            conv_relu_bn(in_ch, out_ch, 1),
+            conv_relu_bn(out_ch, out_ch, 1),
+        ) #
+        self.cdc_layer = nn.Sequential(
+            CDC_conv(in_ch, out_ch), nn.BatchNorm2d(out_ch), nn.ReLU(inplace=True)
+        ) #
+        self.dconv_layer = nn.Sequential(
+            conv_relu_bn(in_ch, in_ch, 2),
+            conv_relu_bn(in_ch, out_ch, 4),
+            conv_relu_bn(out_ch, out_ch, 2),
+        ) #
+        
+        # 实例化 ChannelAttention
+        # CA 的输入通道将是 out_ch * 3，因为我们拼接了三个大小为 out_ch 的特征图
+        self.ca = ChannelAttention(out_ch * 3) 
+        
+        self.final_layer = conv_relu_bn(out_ch * 3, out_ch, 1) #
 
+    def forward(self, x):
+        conv_out = self.conv_layer(x)#标准卷积
+        cdc_out = self.cdc_layer(x)#中心差分卷积
+        dconv_out = self.dconv_layer(x)#中空卷积
+        
+        out = torch.concat([conv_out, cdc_out, dconv_out], dim=1)#合并
+        
+        # 应用 Channel Attention
+        out = self.ca(out) #  在CA模块内部已经包含了残差连接
+        
+        out = self.final_layer(out)#卷积
+        return out
+    
+    
 
 class up_conv(nn.Module):
     """
@@ -344,7 +398,7 @@ class SeRankDet(nn.Module):
         d_s1 = self.conv1(d2)
         d_s2 = self.conv2(d3)
         d_s2 = _upsample_like(d_s2, d_s1)
-        d_s3 = self.conv3(d3)
+        d_s3 = self.conv3(e3)
         d_s3 = _upsample_like(d_s3, d_s1)
         # d_s4 = self.conv4(d5)
         # d_s4 = _upsample_like(d_s4, d_s1)
