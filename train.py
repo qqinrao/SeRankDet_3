@@ -54,7 +54,7 @@ def parse_args():
 class Train(object):
     def __init__(self, args, cfg):
         super(Train, self).__init__()
-        self.cfg = cfg
+        self.cfg = cfg # 导入configs/unetseries/unetseries_serankdet_512x512_500e_irstd1k.py
         self.cfg.gpus = torch.cuda.device_count() if args.local_rank != -1 else 1
         self.resume = args.resume_from
         self.deep_supervision = 'deep_supervision' in self.cfg.model['decode_head']
@@ -124,7 +124,7 @@ class Train(object):
 
 def main(args):
     cfg = Config.fromfile(args.config)
-    trainer = Train(args, cfg)
+    trainer = Train(args, cfg)  
     if args.local_rank != -1:
         torch.distributed.barrier()
     start = torch.load(args.resume_from)['epoch'] + 1 if args.resume_from else 1

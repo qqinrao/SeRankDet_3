@@ -10,7 +10,7 @@ import torch.nn.functional as F
 import torch.utils.data
 import torch
 
-
+#标准卷积
 def conv_relu_bn(in_channel, out_channel, dirate=1):
     return nn.Sequential(
         nn.Conv2d(
@@ -25,7 +25,7 @@ def conv_relu_bn(in_channel, out_channel, dirate=1):
         nn.ReLU(inplace=True),
     )
 
-
+#中空卷积
 class dconv_block(nn.Module):
     """
     Convolution Block
@@ -47,7 +47,7 @@ class dconv_block(nn.Module):
         out = self.conv2(torch.cat((x1, dx3), dim=1))
         return out
 
-
+#中心差分卷积
 class CDC_conv(nn.Module):
     def __init__(
         self,

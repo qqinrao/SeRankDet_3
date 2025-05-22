@@ -1,10 +1,10 @@
 _base_ = [
-    '../_base_/datasets/irstd1k.py',
-    '../_base_/default_runtime.py',
-    '../_base_/schedules/schedule_500e.py',
-    '../_base_/models/unetseries.py'
+    '../_base_/datasets/irstd1k.py',#数据集
+    '../_base_/default_runtime.py',#运行时
+    '../_base_/schedules/schedule_500e.py',#训练
+    '../_base_/models/unetseries.py'#模型基础配置
 ]
-
+# 覆盖unetseries_serankdet_512x512_500e_irstd1k中的 model.decode_head
 model = dict(
     decode_head=dict(
         type='SeRankDet'
