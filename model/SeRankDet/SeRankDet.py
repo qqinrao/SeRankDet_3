@@ -293,7 +293,7 @@ class SeRankDet(nn.Module):
         # --------------------------------------------------------------------------------------------------------------
         # self.conv5 = nn.Conv2d(filters[4], out_ch, kernel_size=3, stride=1, padding=1)
         # self.conv4 = nn.Conv2d(filters[3], out_ch, kernel_size=3, stride=1, padding=1)
-        self.conv3 = nn.Conv2d(filters[2], out_ch, kernel_size=3, stride=1, padding=1)
+        self.conv3 = nn.Conv2d(filters[1], out_ch, kernel_size=3, stride=1, padding=1)
         self.conv2 = nn.Conv2d(filters[1], out_ch, kernel_size=3, stride=1, padding=1)
         self.conv1 = nn.Conv2d(filters[0], out_ch, kernel_size=3, stride=1, padding=1)
         # --------------------------------------------------------------------------------------------------------------
@@ -344,7 +344,7 @@ class SeRankDet(nn.Module):
         d_s1 = self.conv1(d2)
         d_s2 = self.conv2(d3)
         d_s2 = _upsample_like(d_s2, d_s1)
-        d_s3 = self.conv3(d4)
+        d_s3 = self.conv3(d3)
         d_s3 = _upsample_like(d_s3, d_s1)
         # d_s4 = self.conv4(d5)
         # d_s4 = _upsample_like(d_s4, d_s1)

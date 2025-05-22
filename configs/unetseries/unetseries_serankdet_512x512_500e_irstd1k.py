@@ -16,7 +16,7 @@ optimizer = dict(
     setting=dict(lr=0.0001, weight_decay=0.01, betas=(0.9, 0.999))
 )
 
-runner = dict(type='EpochBasedRunner', max_epochs=500)
+runner = dict(type='EpochBasedRunner', max_epochs=250)
 data = dict(
     train_batch=4,
     test_batch=4)
