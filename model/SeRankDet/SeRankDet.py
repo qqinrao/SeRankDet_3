@@ -347,7 +347,7 @@ class SeRankDet(nn.Module):
         # --------------------------------------------------------------------------------------------------------------
         # self.conv5 = nn.Conv2d(filters[4], out_ch, kernel_size=3, stride=1, padding=1)
         # self.conv4 = nn.Conv2d(filters[3], out_ch, kernel_size=3, stride=1, padding=1)
-        self.conv3 = nn.Conv2d(filters[1], out_ch, kernel_size=3, stride=1, padding=1)
+        self.conv3 = nn.Conv2d(filters[2], out_ch, kernel_size=3, stride=1, padding=1)
         self.conv2 = nn.Conv2d(filters[1], out_ch, kernel_size=3, stride=1, padding=1)
         self.conv1 = nn.Conv2d(filters[0], out_ch, kernel_size=3, stride=1, padding=1)
         # --------------------------------------------------------------------------------------------------------------

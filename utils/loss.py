@@ -3,6 +3,7 @@
 # @Email   : 121106022690@njust.edu.cn
 # @File    : loss.py
 # @Software: PyCharm
+#尺寸+位置敏感损失
 import torch
 import torch.nn as nn
 
